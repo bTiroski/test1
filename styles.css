@@ -163,6 +163,7 @@ body {
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+  scroll-snap-align: center;
 }
 
 .card img {
@@ -260,9 +261,11 @@ body {
 }
 
 .slider {
-  overflow: hidden;
-  white-space: nowrap;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  white-space: nowrap; /* Prevent content wrapping */
   position: relative;
+  scroll-snap-type: x mandatory; /* Enable snap scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for mobile */
 }
 
 .slider-inner {
