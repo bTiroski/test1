@@ -5,71 +5,67 @@ function toggleMenu() {
 }
 
 //Slider for container DnevnaDoza
+
 let currentIndex = 0;
-
-function updateNavButtons() {
-  const sliderInner = document.getElementById("slider-inner");
-  const cards = document.querySelectorAll(".card");
-  const cardWidth = cards[0].offsetWidth + 20; // card width + margin
-  const totalCardsWidth = cards.length * cardWidth;
-  const visibleWidth = sliderInner.offsetWidth;
-
-  // Check if scrolling is needed
-  if (totalCardsWidth <= visibleWidth) {
-    // Hide both buttons if all cards are visible
-    document.querySelector(".nav-btn.left").style.display = "none";
-    document.querySelector(".nav-btn.right").style.display = "none";
-  } else {
-    // Adjust button visibility based on currentIndex
-    document.querySelector(".nav-btn.left").style.display =
-      currentIndex === 0 ? "none" : "block";
-    document.querySelector(".nav-btn.right").style.display =
-      currentIndex >= Math.ceil((totalCardsWidth - visibleWidth) / cardWidth)
-        ? "none"
-        : "block";
-  }
-}
 
 function slide(direction) {
   const sliderInner = document.getElementById("slider-inner");
   const cards = document.querySelectorAll(".card");
-  const cardWidth = cards[0].offsetWidth + 20; // card width + margin
-  const totalCardsWidth = cards.length * cardWidth;
-  const visibleWidth = sliderInner.offsetWidth;
+  const cardWidth = cards[0].offsetWidth + 20; // Card width + margin
+  const sliderWidth = sliderInner.offsetWidth;
+  const totalWidth = cards.length * cardWidth;
 
-  const maxIndex = cards.length - 1; // Adjust index for centering
-
-  // Update currentIndex based on direction
+  // Calculate the new index
   currentIndex += direction;
+  if (currentIndex < 0) currentIndex = 0;
+  if (currentIndex * cardWidth + sliderWidth > totalWidth) currentIndex--;
 
-  // Clamp the currentIndex to valid values
-  if (currentIndex < 0) {
-    currentIndex = 0;
-  } else if (currentIndex > maxIndex) {
-    currentIndex = maxIndex;
-  }
-
-  // Calculate the new position to center the card
-  const offset = Math.max(0, (visibleWidth - cardWidth) / 2); // Space to center card
-  const transformX = currentIndex * cardWidth - offset;
-
-  // Ensure transformX doesn't move past the first or last card
-  const maxTransform = totalCardsWidth - visibleWidth;
-  sliderInner.style.transform = `translateX(-${Math.min(
-    Math.max(transformX, 0),
-    maxTransform
-  )}px)`;
+  // Center the cards during scrolling
+  const offset = currentIndex * cardWidth - (sliderWidth - cardWidth) / 2;
+  sliderInner.style.transform = `translateX(${-Math.max(0, offset)}px)`;
 
   // Update navigation button visibility
   updateNavButtons();
 }
 
-// Initialize button visibility on page load and resize
+function updateNavButtons() {
+  const sliderInner = document.getElementById("slider-inner");
+  const cards = document.querySelectorAll(".card");
+  const cardWidth = cards[0].offsetWidth + 20;
+  const totalWidth = cards.length * cardWidth;
+  const visibleWidth = sliderInner.offsetWidth;
+
+  // Hide buttons if scrolling isn't needed
+  document.querySelector(".nav-btn.left").style.display =
+    currentIndex === 0 ? "none" : "block";
+  document.querySelector(".nav-btn.right").style.display =
+    currentIndex * cardWidth + visibleWidth >= totalWidth ? "none" : "block";
+}
+
+let startX = 0;
+let endX = 0;
+
+function handleTouchStart(event) {
+  startX = event.touches[0].clientX;
+}
+
+function handleTouchMove(event) {
+  endX = event.touches[0].clientX;
+}
+
+function handleTouchEnd() {
+  const direction = startX - endX > 0 ? 1 : -1; // Swipe direction
+  if (Math.abs(startX - endX) > 50) slide(direction); // Threshold
+}
+
+// Initialize
 document.addEventListener("DOMContentLoaded", () => {
-  updateNavButtons();
-});
-window.addEventListener("resize", () => {
-  updateNavButtons(); // Adjust visibility on window resize
+  const slider = document.querySelector(".slider-inner");
+  slider.addEventListener("touchstart", handleTouchStart, { passive: true });
+  slider.addEventListener("touchmove", handleTouchMove, { passive: true });
+  slider.addEventListener("touchend", handleTouchEnd);
+
+  updateNavButtons(); // Initialize button visibility
 });
 
 //END of slider container DnevnaDoza
